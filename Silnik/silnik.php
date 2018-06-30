@@ -67,3 +67,73 @@ if(!WykonajZapytanie($ZapytanieKonfiguracja)){
 
 $Wynik = PobierzWynik();
 $IleWYnikow = PobierzIlosc();
+
+//przekształcamy otrzymaną tablicę w tabelę asocjacyjną w której kluczami będą
+//wartości w polu konfig_nazwa a wartościami dane wprowadzone do pola konfig_wartosc
+
+for ($i = 0; $i < $IleWYnikow; $i++) {
+    $kluczWyniku = $Wynik[$i]['konfig_nazwa'];
+    $KonfiguracjaWitryny[$kluczWyniku]= $Wynik[$i]['konfig_wartosc'];
+}
+// Sprawdzam czy użytkownik jest zalogowany na swoje konto w systemie
+//funkcja empty sprawdza czy zmienna $_SESSION['uzy_id'] zawiera jakąs wartość
+// jesli nie definiujemy zmienne sesji jako puste
+if(empty($_SESSION['uzy_id'])){
+    $_SESSION['uzy_id'] = '';
+    $_SESSION['uzy_nazwa'] = '';
+    $_SESSION['uzy_email'] = '';
+    //przy zmiennych _SESSION['uzy_szablon] i _SESSION['uzy_jezyk'] wpisujemy wartość
+    //tablicy konfiguracyjnej, dzięki temu dla użytkownika niezalogowanego
+    // ustalony zostanie domyślny szablon i język
+    $_SESSION['uzy_szablon'] = $KonfiguracjaWitryny['dt'];
+    $_SESSION['uzy_jezyk'] = $KonfiguracjaWitryny['dt'];
+    $_SESSION['uzy_czy_admin'] = '';
+    $_SESSION['uzy_zalogowany'] = '';
+    
+    //blokowanie użytkowników o określonym numerze ip, sprawdzamy czy taka opcja została 
+    //włączona w panelu administratora
+    if($KonfiguracjaWitryny['blip'] == tak){
+        //jeśli tak to wykonujemy zapytanie pobierające wszystkie numery ip zabronione
+        if($BazaDanych == 'mysql'){
+            $ZapytanieIp = 'SELECT ip_numer FROM'.$PrefixTabelek.'banujip';
+        }
+        //sprawdzam poprawność zapytania
+        if(!WykonajZapytanie($ZapytanieIp)){
+            PokazBlad('Błąd w zapytaniu', __FILE__, __LINE__, $ZapytanieIp);
+        }
+        //Pobieramy wynik zapytania do zmiennych zawierajacych wynik oraz ich liczbę
+        $Wynik = PobierzWynik();
+        $IleWYnikow = PobierzIlosc();
+        
+        //sprawdzamy czy wynik pasuje do IP obecnego użytkownika zapisanego w zmiennej
+        // $_SERVER['REMOTE_ADDR']
+        for ($i = 0; $i < $IleWYnikow; $i++) {
+            if($Wynik[$i]['ip_numer'] == $_SERVER['REMOTE_ADDR']){
+                //jeśli wynik pasuje do obecnego IP wyświetlamy komunikat że nie 
+                //ma dostępu do strony. w tym celu włączamy odpowiedni plik
+                include ('./strony_html'. addslashes($_SESSION['uzy_jezyk']).'/zbanowany_ip.html');
+                exit();
+            }
+        }
+    }
+    //teraz włączamy zapisany w pliku określony język, w ifie sprawdzam czy język został włączony
+    if(!include ('./jezyki/'.addslashes($_SESSION['uzy_jezyk']).'/jezyk.php')){
+        //Jeśli język nie został włączony wyświetlamy odpowiedni komunikat
+        echo 'Nie mogłem włączyć tego języka: '. addslashes($_SESSION['uzy_jezyk']);
+        exit();
+    }
+    //wyświetlamy szablon strony
+    
+    function DrukujSzablonStrony(){
+        global $CMSModul;
+        global $StronaTytul;
+        global $SlowaKluczowe;
+        global $OpisStrony;
+        //sprawdzam czy można włączyć szablon użytkownika
+        if(!include ('./szablony/'. addslashes($_SESSION['uzy_szablon']).'/sza-blon.php')){
+            // jeśli nie mozna go włączyć wyświetlamy komunikat
+            echo 'Nie mogłem włączyć tego szablonu:'. addslashes($_SESSION['uzy_szablon']);
+            exit();
+        }
+    }
+}
