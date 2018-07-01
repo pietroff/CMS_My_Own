@@ -136,4 +136,128 @@ if(empty($_SESSION['uzy_id'])){
             exit();
         }
     }
-}
+    //deklaracja nagłówka
+    function DrukujNaglowek($StronaTytul,$SlowaKluczowe,$OpisStrony){
+        //deklarujemy zmienne globalne
+        global $KonfiguracjaWitryny;
+        global $JezykStrony;
+        
+        //deklarujemy elementy jeżyka XHTML
+        echo '<?xml version="1.0" encoding="'.$JezykStrony['kodowanie'].'"?>';
+        echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"';
+        echo '"http://localhost/dtd/xhtmlll.dtd">';
+        echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="'.$JezykStrony['jezyk'].'">';
+        echo '<head>';
+        echo '<meta http-equiv="Content-Type" content="text/html; charset='.$JezykStrony['kodowanie'].'" />';
+        echo '<meta http-equiv="Content-language" content="'.$JezykStrony['jezyk_okresl'].'" />';
+        echo '<meta name="copyright" content="home-tec.pl THE BEST CMS">';
+        //opis strony
+        echo '<meta name="description" content="'.$OpisStrony.'" />';
+        
+        //Słowa kluczowe
+        echo '<meta name="keywords" content="'.$SlowaKluczowe.'" />';
+        echo '<meta name="robots" content="all" />';
+        echo '<meta name="rating" content="general" />';
+        echo '<meta name="resource-type" content="document" />';
+        echo '<meta name="generator" content="home-tec.pl THE BEST CMS" />';
+        //włączamy plik ze stylami css
+        
+        echo '<link rel="stylesheet" type="text/css" href="szablony/'.addslashes($_SESSION[uzy_szablon]).'/style.css" />';
+        
+        //tytuł strony
+        
+        echo '<title>'.$StronaTytul.''.$KonfiguracjaWitryny['nazwa'].'</title>';
+        echo '</head>';
+        echo '<body>';
+        
+        //deklarujemy tabelę w której będzie logo naszej firmy
+        echo '<table class="tabela_logo">';
+        echo '<tr>';
+        echo '<td class="komorka_logo"></td>';
+        echo '</tr>';
+        echo '</table>';
+    }
+    //funkcja która wyświetli ścieżkę dostępu do strony
+    function DrukujSciezke(){
+        global $URLDlaModulu;
+        //wyświetlamy ścieżkę
+        echo $URLDlaModulu;
+    }
+    //funkcja wyświetlająca bloki po lewej stronie witryny
+    function DrukujLeweMenu(){
+        global $BazaDanych;
+        global $PrefixTabelek;
+        
+        //sprawdzam która baza danych jest włączona i deklaruję odpowiednie zapytanie
+        if($BazaDanych == 'mysql'){
+            $ZapytanieBlok = 'SELECT * FROM '.$PrefixTabelek.'bloki WHERE blok_strona = "1" AND blok_aktywny = "t" ORDER BY blok_pozycja ASC';
+        }
+        //Za pomoca interfejsu wykonujemy zapytanie do bazy
+        if(!WykonajZapytanie($ZapytanieBlok)){
+            PokazBlad('Błąd w zapytaniu', __FILE__, __LINE__, $ZapytanieBlok);
+        }
+        //Pobieramy wyniki i zapisujemy je w zmiennych
+        $Wynik = PobierzWynik();
+        $IleWynikow = PobierzIlosc();
+        //Deklarujemy tabelę w języku XHTMLoraz przypisaną do niej klasą
+        echo '<table class="l_menu" cellpadding="0" cellspacing="0">';
+        
+        //Wyświetlamy wszystkie bloki ustawione po tej stronie witryny
+        
+        for ($i = 0; $i < $IleWynikow; $i++) {
+            echo '<tr>';
+            echo '<td class="l_1">'. stripslashes($Wynik[$i]['blok_pokaz']).'</td>';
+            echo '</tr>';
+            echo '<tr>';
+            echo '<td class="l_2">';
+            // za pomocą include włączam plik zawierający dany blok aby go wyświetlić
+            include ('./bloki/'.$Wynik[$i]['blok_nazwa'].'/'.$Wynik[$i]['blok_nazwa'].'.php');
+            echo '</td>';
+            echo '</tr>';
+            echo '<tr>';
+            echo '<td class="l_3"></td>';
+            echo '</tr>';
+            //zamykamy lewą tabelę
+        }  
+            echo '</table>';
+        }
+        //funkacja deklarująca bloki po prawej stronie
+        
+        function DrukujPraweMenu(){
+            global $BazaDanych;
+            global $PrefixTabelek;
+            
+            if($BazaDanych == 'mysql'){
+                $ZapytanieBlok = 'SELECT * FROM '.$PrefixTabelek.'bloki WHERE blok_strona = "p" AND blok_aktywny = "t" ORDER BY blok_pozycja ASC';
+            }
+             //Za pomoca interfejsu wykonujemy zapytanie do bazy
+        if(!WykonajZapytanie($ZapytanieBlok)){
+            PokazBlad('Błąd w zapytaniu', __FILE__, __LINE__, $ZapytanieBlok);
+        }
+        //Pobieramy wyniki i zapisujemy je w zmiennych
+        $Wynik = PobierzWynik();
+        $IleWynikow = PobierzIlosc();
+        //Deklarujemy tabelę w języku XHTMLoraz przypisaną do niej klasą dla css
+        echo '<table class="p_menu" cellpadding="0" cellspacing="0">';
+        
+        //Wyświetlamy wszystkie bloki ustawione po tej stronie witryny
+        
+        for ($i = 0; $i < $IleWynikow; $i++) {
+            echo '<tr>';
+            echo '<td class="p_1">'. stripslashes($Wynik[$i]['blok_pokaz']).'</td>';
+            echo '</tr>';
+            echo '<tr>';
+            echo '<td class="p_2">';
+            // za pomocą include włączam plik zawierający dany blok aby go wyświetlić
+            include ('./bloki/'.$Wynik[$i]['blok_nazwa'].'/'.$Wynik[$i]['blok_nazwa'].'.php');
+            echo '</td>';
+            echo '</tr>';
+            echo '<tr>';
+            echo '<td class="p_3"></td>';
+            echo '</tr>';
+            //zamykamy prawą tabelę         
+            } 
+             echo '</table>';
+        }
+        
+    }
