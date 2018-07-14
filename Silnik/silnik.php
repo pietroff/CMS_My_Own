@@ -89,7 +89,7 @@ if(empty($_SESSION['uzy_id'])){
     $_SESSION['uzy_jezyk'] = $KonfiguracjaWitryny['dt'];
     $_SESSION['uzy_czy_admin'] = '';
     $_SESSION['uzy_zalogowany'] = '';
-    
+}
     //blokowanie użytkowników o określonym numerze ip, sprawdzamy czy taka opcja została 
     //włączona w panelu administratora
     if($KonfiguracjaWitryny['blip'] == tak){
@@ -290,9 +290,26 @@ if(empty($_SESSION['uzy_id'])){
         
         function PokazOknoLogowania(){
             global $JezykAdmin;
+            
             ?>
-            <form method="post" action="zaloguj.php">
-             
-            ?>
+<form method="post" action="zaloguj.php">
+    <table>
+        <tr>
+            <td><?php echo $JezykAdmin['nazwa_konta']; ?>;</td>   
+            <td><input type="text" name="login_konta"></td>
+        </tr>
+        <tr>
+            <td><?php echo $JezykAdmin['haslo_dostepu']; ?>;</td>   
+            <td><input type="password" name="haslo_konta"></td>
+        </tr>
+        <tr>
+            <td></td><td>
+                <input type="hidden" name="logowanie" value="tak">
+                    <input type="submit" value="<?php echo $JezykAdmin[zaloguj_mnie]; ?>">
+            </td>
+        </tr>
+    </table>
+</form>
+            <?php
         }
-    }
+        ?>
