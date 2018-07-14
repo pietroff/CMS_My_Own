@@ -259,5 +259,40 @@ if(empty($_SESSION['uzy_id'])){
             } 
              echo '</table>';
         }
+        //deklarujemy stopkę
+        function DrukujStopke(){
+            echo '<div class="stopka">';
+            echo 'Copyright &copy; 2006 <a href="//home-tec.pl"> Home-TEC.pl PRO CMS';
+            echo '</div>';
+            echo '</body>';
+            echo '</html>';
+        }
+        //Deklarujemy funkcję wyświetlającą błąd
         
+        function DrukujBlad($TrescInformacji){
+            global $JezykStrony;
+            echo '<div class="niepoprwanie">';
+            echo $TrescInformacji;
+            echo '<br />';
+            echo $JezykStrony['wroc_blad'];
+            echo '</div>';
+        }
+        //deklarujemy funkcję która poinforuje użytkownika o poprawnym zakończeniu akcji
+        function DrukujPoprawne($TrescInformacji){
+            global $JezykStrony;
+            echo '<div class="poprawnie">';
+            echo $TrescInformacji;
+            echo '<br />';
+            echo $JezykStrony['poprawnie_idz_dalej'];
+            echo '</div>';
+        }
+        //funkcja do logowania na konto administratora
+        
+        function PokazOknoLogowania(){
+            global $JezykAdmin;
+            ?>
+            <form method="post" action="zaloguj.php">
+             
+            ?>
+        }
     }
